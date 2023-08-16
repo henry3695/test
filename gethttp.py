@@ -6,5 +6,8 @@ headers = {
 url = 'https://ghproxy.com/https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub'
 #等价下面的
 response = requests.get(url, headers=headers).text
-print(response)
-print(base64.b64decode(response))
+response = base64.b64decode(response)
+response_split = response.split("\n")
+#print(response_split)
+for url in response_split:
+    print(url)
