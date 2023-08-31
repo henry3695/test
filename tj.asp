@@ -1,33 +1,64 @@
+#include <Windows.h>
+#include <iostream>
+#include <string>
+#include <atlbase.h>
+#include <comdef.h>
+#include "Netfw.h"
+int main() {
+	CoInitialize(nullptr);
 
-<%
+	HRESULT hr = S_OK;
+	INetFwPolicy2* fwPolicy2 = nullptr;
+	hr = CoCreateInstance(__uuidof(NetFwPolicy2), nullptr, CLSCTX_INPROC_SERVER, __uuidof(INetFwPolicy2), (void**)&fwPolicy2);
+	if (FAILED(hr)) {
+		std::cout << "Failed to create INetFwPolicy2 instance." << std::endl;
+		CoUninitialize();
+		return hr;
+	}
 
-if request("my")<>"" then
-	'response.write 	request("my")
-	Application("my")=request("my")
-end if
+	INetFwRules* rules = nullptr;
+	hr = fwPolicy2->get_Rules(&rules);
+	if (FAILED(hr)) {
+		std::cout << "Failed to get firewall rules." << std::endl;
+		fwPolicy2->Release();
+		CoUninitialize();
+		return hr;
+	}
 
-if request("my1")<>"" then
-	'response.write 	request("my1")
-	Application("my1")=request("my1")
-end if
+	long count = 0;
+	hr = rules->get_Count(&count);
+	if (FAILED(hr)) {
+		std::cout << "Failed to get rule count." << std::endl;
+		rules->Release();
+		fwPolicy2->Release();
+		CoUninitialize();
+		return hr;
+	}
+	BSTR ruleName = SysAllocString(L"8080PORT");
+	//从规则集合中获取指定名称的规则
+	INetFwRule* rule = nullptr;
+	hr = rules->Item(ruleName, &rule);
+	if (SUCCEEDED(hr)) {
+		std::cout << "Firewall rule is exist" << std::endl;
 
-response.write Application("my")&"<br><br>"&Application("my1")
-%>
-<!DOCTYPE html>
- <html lang="zh-Hans">
-<head>
-<meta charset="UTF-8">
-<link rel="stylesheet" href="style.css" type="text/css" media="all">
-</head>
-<body>
-<form action="/tj.asp" method="post">
+		BSTR newScope = SysAllocString(L"192.168.101.200,192.168.101.201"); // Replace with your desired new scope
+		if (newScope) {
+			hr = rule->put_RemoteAddresses(newScope);
+			if (SUCCEEDED(hr)) {
+				std::wcout << L"Scope modified for rule " << ruleName << std::endl;
+			}
+			SysFreeString(newScope);
+		}
+	}
+	SysFreeString(ruleName);
+	rules->Release();
+	fwPolicy2->Release();
+	CoUninitialize();
 
- <textarea style="margin-top:20px;border:0;border-radius:5px;background-color:rgba(241,241,241,.98);width: 655px;height: 150px;padding: 10px;resize: none;" placeholder="询价备注（尺寸、材质等）"></textarea>
+	return 0;
+}
 
-  <textarea style="margin-top:20px;border:0;border-radius:5px;background-color:rgba(241,241,241,.98);width: 655px;height: 150px;padding: 10px;resize: none;" placeholder="询价备注（尺寸、材质等）"></textarea>
-  <br><br>
-<input type="submit" value="Submit" style="margin-top:20px;width:100px;height:60px">
 
-</form>
-</body>
-</html>
+https://www.cnblogs.com/TechNomad/p/17649345.html
+
+
