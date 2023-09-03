@@ -1,64 +1,25 @@
-#include <Windows.h>
 #include <iostream>
-#include <string>
-#include <atlbase.h>
-#include <comdef.h>
-#include "Netfw.h"
+#include <windows.h>
+
 int main() {
-	CoInitialize(nullptr);
+    // 设置新的屏幕保护时间（以秒为单位）
+    DWORD newScreenSaverTimeInSeconds = 600;  // 10分钟
 
-	HRESULT hr = S_OK;
-	INetFwPolicy2* fwPolicy2 = nullptr;
-	hr = CoCreateInstance(__uuidof(NetFwPolicy2), nullptr, CLSCTX_INPROC_SERVER, __uuidof(INetFwPolicy2), (void**)&fwPolicy2);
-	if (FAILED(hr)) {
-		std::cout << "Failed to create INetFwPolicy2 instance." << std::endl;
-		CoUninitialize();
-		return hr;
-	}
+    // 打开注册表键
+    HKEY hKey;
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, L"Control Panel\\Desktop", 0, KEY_WRITE, &hKey) == ERROR_SUCCESS) {
+        // 设置新的屏幕保护时间
+        if (RegSetValueEx(hKey, L"ScreenSaveTimeOut", 0, REG_SZ, (const BYTE*)&newScreenSaverTimeInSeconds, sizeof(newScreenSaverTimeInSeconds)) == ERROR_SUCCESS) {
+            std::cout << "屏幕保护时间已成功设置为 " << newScreenSaverTimeInSeconds << " 秒。" << std::endl;
+        } else {
+            std::cerr << "无法设置屏幕保护时间。" << std::endl;
+        }
 
-	INetFwRules* rules = nullptr;
-	hr = fwPolicy2->get_Rules(&rules);
-	if (FAILED(hr)) {
-		std::cout << "Failed to get firewall rules." << std::endl;
-		fwPolicy2->Release();
-		CoUninitialize();
-		return hr;
-	}
+        // 关闭注册表键
+        RegCloseKey(hKey);
+    } else {
+        std::cerr << "无法打开注册表键。" << std::endl;
+    }
 
-	long count = 0;
-	hr = rules->get_Count(&count);
-	if (FAILED(hr)) {
-		std::cout << "Failed to get rule count." << std::endl;
-		rules->Release();
-		fwPolicy2->Release();
-		CoUninitialize();
-		return hr;
-	}
-	BSTR ruleName = SysAllocString(L"8080PORT");
-	//从规则集合中获取指定名称的规则
-	INetFwRule* rule = nullptr;
-	hr = rules->Item(ruleName, &rule);
-	if (SUCCEEDED(hr)) {
-		std::cout << "Firewall rule is exist" << std::endl;
-
-		BSTR newScope = SysAllocString(L"192.168.101.200,192.168.101.201"); // Replace with your desired new scope
-		if (newScope) {
-			hr = rule->put_RemoteAddresses(newScope);
-			if (SUCCEEDED(hr)) {
-				std::wcout << L"Scope modified for rule " << ruleName << std::endl;
-			}
-			SysFreeString(newScope);
-		}
-	}
-	SysFreeString(ruleName);
-	rules->Release();
-	fwPolicy2->Release();
-	CoUninitialize();
-
-	return 0;
+    return 0;
 }
-
-
-https://www.cnblogs.com/TechNomad/p/17649345.html
-
-
