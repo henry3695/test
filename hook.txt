@@ -1,0 +1,49 @@
+#include <iostream>
+#include <windows.h>
+
+// 声明原始的MessageBoxW函数指针
+typedef int (WINAPI* MessageBoxW_t)(HWND, LPCWSTR, LPCWSTR, UINT);
+
+// 定义一个全局的MessageBoxW函数指针
+MessageBoxW_t originalMessageBoxW;
+
+// 用于拦截的MessageBoxW函数
+int WINAPI HookedMessageBoxW(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType) {
+    // 在这里可以添加你的自定义逻辑
+    std::wcout << L"拦截到MessageBoxW调用:" << std::endl;
+    std::wcout << L"标题: " << lpCaption << std::endl;
+    std::wcout << L"内容: " << lpText << std::endl;
+
+    // 调用原始的MessageBoxW函数
+    return originalMessageBoxW(hWnd, lpText, lpCaption, uType);
+}
+
+int main() {
+    // 获取用户32.dll模块句柄
+    HMODULE user32Module = GetModuleHandle(L"user32.dll");
+    if (user32Module == nullptr) {
+        std::cerr << "无法获取user32.dll模块句柄" << std::endl;
+        return 1;
+    }
+
+    // 获取MessageBoxW函数的地址
+    originalMessageBoxW = reinterpret_cast<MessageBoxW_t>(GetProcAddress(user32Module, "MessageBoxW"));
+    if (originalMessageBoxW == nullptr) {
+        std::cerr << "无法获取MessageBoxW函数地址" << std::endl;
+        return 1;
+    }
+
+    // 安装钩子
+    if (SetWindowsHookEx(WH_CBT, reinterpret_cast<HOOKPROC>(HookedMessageBoxW), nullptr, GetCurrentThreadId()) == nullptr) {
+        std::cerr << "无法安装钩子" << std::endl;
+        return 1;
+    }
+
+    // 模拟一个MessageBoxW调用
+    MessageBoxW(nullptr, L"这是一个测试", L"测试", MB_OK);
+
+    // 卸载钩子
+    UnhookWindowsHookEx(reinterpret_cast<HHOOK>(HookedMessageBoxW));
+
+    return 0;
+}
