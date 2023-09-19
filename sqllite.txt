@@ -1,0 +1,86 @@
+#include <QtSql>
+
+int main(int argc, char *argv[])
+{
+    // 初始化Qt应用程序
+    QApplication a(argc, argv);
+
+    // 创建SQLite数据库连接
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("mydatabase.db"); // 替换为你的SQLite数据库文件名
+
+    // 打开数据库
+    if (!db.open()) {
+        qDebug() << "无法打开数据库";
+        return 1;
+    }
+
+    // 执行SQL查询
+    QSqlQuery query;
+    query.exec("CREATE TABLE IF NOT EXISTS employees (id INTEGER PRIMARY KEY, name TEXT, age INTEGER)");
+
+    // 插入数据
+    query.prepare("INSERT INTO employees (name, age) VALUES (:name, :age)");
+    query.bindValue(":name", "John");
+    query.bindValue(":age", 30);
+    query.exec();
+
+    // 查询数据
+    query.exec("SELECT * FROM employees");
+    while (query.next()) {
+        int id = query.value(0).toInt();
+        QString name = query.value(1).toString();
+        int age = query.value(2).toInt();
+        qDebug() << "ID:" << id << "Name:" << name << "Age:" << age;
+    }
+
+    // 关闭数据库连接
+    db.close();
+
+    return a.exec();
+}
+
+
+
+
+#include <QtSql>
+
+int main(int argc, char *argv[])
+{
+    // 初始化Qt应用程序
+    QApplication a(argc, argv);
+
+    // 创建SQLite数据库连接
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("mydatabase.db"); // 替换为你的SQLite数据库文件名
+
+    // 打开数据库
+    if (!db.open()) {
+        qDebug() << "无法打开数据库";
+        return 1;
+    }
+
+    // 执行SQL查询
+    QSqlQuery query;
+    query.exec("CREATE TABLE IF NOT EXISTS employees (id INTEGER PRIMARY KEY, name TEXT, age INTEGER)");
+
+    // 插入数据
+    query.prepare("INSERT INTO employees (name, age) VALUES (:name, :age)");
+    query.bindValue(":name", "John");
+    query.bindValue(":age", 30);
+    query.exec();
+
+    // 查询数据
+    query.exec("SELECT * FROM employees");
+    while (query.next()) {
+        int id = query.value(0).toInt();
+        QString name = query.value(1).toString();
+        int age = query.value(2).toInt();
+        qDebug() << "ID:" << id << "Name:" << name << "Age:" << age;
+    }
+
+    // 关闭数据库连接
+    db.close();
+
+    return a.exec();
+}
