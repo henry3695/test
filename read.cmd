@@ -1,3 +1,58 @@
+#include <QtXml/QXmlStreamReader>
+#include <QDebug>
+
+int main() {
+    // 创建一个QXmlStreamReader对象并打开XML文件
+    QFile file("your_xml_file.xml");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "无法打开XML文件";
+        return 1;
+    }
+
+    QXmlStreamReader xml(&file);
+
+    // 开始解析XML
+    while (!xml.atEnd() && !xml.hasError()) {
+        // 读取下一个XML标记
+        xml.readNext();
+
+        // 检查标记类型
+        if (xml.isStartElement()) {
+            // 处理开始标记
+            qDebug() << "开始标记: " << xml.name().toString();
+
+            // 如果需要，可以访问标记的属性
+            QXmlStreamAttributes attributes = xml.attributes();
+            foreach (const QXmlStreamAttribute &attribute, attributes) {
+                qDebug() << "属性名: " << attribute.name().toString()
+                         << " 属性值: " << attribute.value().toString();
+            }
+        } else if (xml.isEndElement()) {
+            // 处理结束标记
+            qDebug() << "结束标记: " << xml.name().toString();
+        } else if (xml.isCharacters() && !xml.isWhitespace()) {
+            // 处理元素文本
+            qDebug() << "文本: " << xml.text().toString();
+        }
+    }
+
+    // 如果解析遇到错误，则打印错误信息
+    if (xml.hasError()) {
+        qDebug() << "XML解析错误: " << xml.errorString();
+        return 1;
+    }
+
+    // 关闭文件
+    file.close();
+
+    return 0;
+}
+
+
+
+
+
+
 //node_test.js
 const log4js = require("log4js");
 const http = require('http');
