@@ -41,9 +41,8 @@ int main(int argc, char *argv[])
 }
 
 
-
-
 #include <QtSql>
+#include <QFile>
 
 int main(int argc, char *argv[])
 {
@@ -60,23 +59,31 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // 执行SQL查询
+    // 创建表格用于存储图像
     QSqlQuery query;
-    query.exec("CREATE TABLE IF NOT EXISTS employees (id INTEGER PRIMARY KEY, name TEXT, age INTEGER)");
+    query.exec("CREATE TABLE IF NOT EXISTS images (id INTEGER PRIMARY KEY, image BLOB)");
 
-    // 插入数据
-    query.prepare("INSERT INTO employees (name, age) VALUES (:name, :age)");
-    query.bindValue(":name", "John");
-    query.bindValue(":age", 30);
-    query.exec();
+    // 读取图像文件并插入到数据库
+    QFile file("image.jpg"); // 替换为你的图像文件名
+    if (file.open(QIODevice::ReadOnly)) {
+        QByteArray imageData = file.readAll();
+        file.close();
 
-    // 查询数据
-    query.exec("SELECT * FROM employees");
+        query.prepare("INSERT INTO images (image) VALUES (:image)");
+        query.bindValue(":image", imageData);
+        query.exec();
+    } else {
+        qDebug() << "无法打开图像文件";
+    }
+
+    // 从数据库中读取图像
+    query.exec("SELECT image FROM images");
     while (query.next()) {
-        int id = query.value(0).toInt();
-        QString name = query.value(1).toString();
-        int age = query.value(2).toInt();
-        qDebug() << "ID:" << id << "Name:" << name << "Age:" << age;
+        QByteArray imageData = query.value(0).toByteArray();
+        QPixmap image;
+        image.loadFromData(imageData);
+        
+        // 在这里使用image来显示或处理图像
     }
 
     // 关闭数据库连接
