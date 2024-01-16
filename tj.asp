@@ -1,1 +1,43 @@
-526172211a070100f3e182eb0b0105070006010180808000267f960d2402030bd50104b103209933c6ed800300084d616b6566696c650a03027b9654cd010bda01c149d227754332f66044dd50783cd08506968dd4840ba294174ba285e0091962da8df832d47425ef2a198c8c97434bc4e04c993deff9e93927b3e1eccf613261fb5fee3324b2f1ddc23df344ebf75f3c4779e861774e8b397541efb89112a3535c161234a0c3b494a4fd90344ddfc1928b82905e8edb7cecda526af5f99c02db9d0021b0d3d863ed23e2394e015acfcabc1385c24e8e7050cc551ef47f8bbe76bb18154815725f462e9ca698abe19e5cacc953d6c1951192271300833e415b39504ce198331b704c260d5945626a26b81bf5ae0e8036df42602202030be10004e80020e9a4f96780030006417265612e680a03028b443e34fe0ada01c7c35e3454522f934b924383fe4695adb96343c53e8914905080834317bcb27c1a0e35bb46cf7b79564ce0595e719adae1d7710670849cc858bde193922737655b0cd6a45e58aa62b2dc2598a9dcc0561efd9ca1a2c5680fd99d128310ba4ef3ff2da847c52402030bf30004950120dedbf44b80030008436972636c652e680a0302ddba5ebcfe0ada01c2e8703555531f944cc48d0ff86130b401891a4beaa2c94a96a9810df24fad6034d7a4f77ddf6aae60e680e60e69c93358df8882b231e286446464b6d384652e9f08ff6352ce2fc88c58c0ad0b2a16d4768336d894181dc43bf4eee4fbf2cd4f97e7e8785a90e8d1486aa45a0cc15b3d1c3d803134b53b2102030bc80004ca0020c51db204800300056465662e680a0302659f5ab7000bda01c1de452455324f943efa1b43c068cdd36978460886b2248adffca3d1a7f3fff56381952caec34b082a11f7d4aa85fe6661ed55f0c636fb84d19615b659783a0246c6f718811f3f00025614d12502030bf300049801206515492080030009537175617265732e680a03027962ed8cfe0ada01c3e9703566431f944dc48e0f90d2697003538338162a8b25296a9a10ef24c29a1c6b264fbefbfe57ed1edfef71f8b158db7882b031e07e246064b6b38425d64b743f9342ce2e5118b1814e4d1e85f9890f62da9283079843b72f4fc8fdb1c93f61c7e1ecf442f3242434522b065cad5d0ddd404776e72a2402030bbb0004c60020a97c0a7f80030008417265612e6370700a03029e70ca8ffe0ada01c7a538205541fa44dea70758d269700cd6e288ca293429a91df164d2717ffefd7fdeeceba5a35c48940fb941d304a3b0fc227ac6a519e5d787dfc88e95109f2602030be00004890120cbe11bb18003000a436972636c652e6370700a0302955dd4cb000bda01c3c45d2554432f934b941e0f08d2b4bc0232b78a49a134349a0ac5a117bca105d2508f15dd0cc33e619cbfdeafd4fb8dda317149e0a5e439b883082ecad392063116ebe70f13fe7e0fafc26c62f550fa40f7ef538e5aa9ada657e3c22f2c7da07aa1d2ee2402030bfe0004a501201867e1de800300086d61696e2e6370700a0302bcf066dafe0ada01c4e57b2544442f750349941e0f82c2b0a33b23c11e05a6eebf00baaefc0c08f7a52df90d1e318597975997ca6828a86a1f7b8fc97a8f8390928d09b27ba38a17a1af47196967f96abd61a9f2473395a4a36239ccc70363514f211b4b13059660fd8641f540ba744802cecbb2d7877a7b5911d7dea15f10f1ae5a8a8e9fb874b56be82702030be40004900120a7bfdc4a8003000b537175617265732e6370700a0302e1f6148ffe0ada01c3f8612565522f76044cd20e8746c3586d00ce8bb4142a0a08f8a6f5608adf51152210e95f7b077f477547d97ec3ce61e69badd053c56c31f0c871cd91b9a7293ee9228448165a526fdff1fdde68bda839669ca2d0dbad4a01d0c94cf07f08c82df7fb701d77565103050400
+#include <QCoreApplication>
+#include <QDebug>
+
+class RectangularRegion
+{
+public:
+    static void getBoundingBox(double centerLatitude, double centerLongitude, double halfWidth, double halfHeight)
+    {
+        // 计算矩形区域的四个顶点经纬度
+        double upperLeftLatitude = centerLatitude + halfHeight;
+        double upperLeftLongitude = centerLongitude - halfWidth;
+
+        double upperRightLatitude = centerLatitude + halfHeight;
+        double upperRightLongitude = centerLongitude + halfWidth;
+
+        double lowerLeftLatitude = centerLatitude - halfHeight;
+        double lowerLeftLongitude = centerLongitude - halfWidth;
+
+        double lowerRightLatitude = centerLatitude - halfHeight;
+        double lowerRightLongitude = centerLongitude + halfWidth;
+
+        // 打印四个顶点的经纬度
+        qDebug() << "Upper Left: (" << upperLeftLatitude << ", " << upperLeftLongitude << ")";
+        qDebug() << "Upper Right: (" << upperRightLatitude << ", " << upperRightLongitude << ")";
+        qDebug() << "Lower Left: (" << lowerLeftLatitude << ", " << lowerLeftLongitude << ")";
+        qDebug() << "Lower Right: (" << lowerRightLatitude << ", " << lowerRightLongitude << ")";
+    }
+};
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+
+    // 以中国的中心区域为例，设置中心经纬度和矩形的半宽半高
+    double centerLatitude = 35.8617; // 中国中心区域的纬度
+    double centerLongitude = 104.1954; // 中国中心区域的经度
+    double halfWidth = 5.0; // 矩形宽度的一半（示例值）
+    double halfHeight = 5.0; // 矩形高度的一半（示例值）
+
+    RectangularRegion::getBoundingBox(centerLatitude, centerLongitude, halfWidth, halfHeight);
+
+    return a.exec();
+}
