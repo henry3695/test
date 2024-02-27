@@ -15,3 +15,5 @@ git commit -m "进行了一些修改"
 
 # 推送修改
 git push
+
+git pull
